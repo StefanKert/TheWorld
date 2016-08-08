@@ -9,6 +9,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using TheWorld.Services;
+using TheWorld.Models;
+using Newtonsoft.Json.Serialization;
+using AutoMapper;
+using TheWorld.ViewModels;
 
 namespace TheWorld
 {
@@ -38,17 +42,33 @@ namespace TheWorld
             {
 
             }
-            services.AddMvc();
+            services.AddDbContext<WorldContext>();
+            services.AddScoped<IWorldRepository, WorldRepository>();
+            services.AddTransient<WorldContextSeedData>();
+            services.AddTransient<GeoCoordsService>();
+            services.AddLogging();
+            services.AddMvc().AddJsonOptions(config => config.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver());
         }
 
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory, WorldContextSeedData seeder, ILoggerFactory factory)
         {
+            Mapper.Initialize(config => {
+                config.CreateMap<TripViewModel, Trip>().ReverseMap();
+                config.CreateMap<StopViewModel, Stop>().ReverseMap();
+            });
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+                factory.AddDebug(LogLevel.Information);
+            }
+            else
+            {
+                factory.AddDebug(LogLevel.Error);
             }
             app.UseStaticFiles();
             app.UseMvc(config => { config.MapRoute("Default", "{controller}/{action}/{id?}", new { controller = "App", action = "Index" }); });
+            seeder.EnsureSeedData().Wait();
         }
     }
 }

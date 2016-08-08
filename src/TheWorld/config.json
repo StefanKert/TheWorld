@@ -1,5 +1,13 @@
 ﻿{
   "MailSettings": {
-    "ToAddress":  "stefan.kert@sbg.at"
+    "ToAddress": "stefan.kert@sbg.at"
+  },
+  "ConnectionStrings": {
+    "WorldContextConnection": "Server=(localdb)\\MSSQLLocalDB;Database=TheWorldDb;Trusted_Connection=true;MultipleActiveResultSets=true;",
+  },
+
+  "Keys": {
+    "BingKey": "DONOTPUTKEYSINSOURCECONTROL"
   }
+
 }
