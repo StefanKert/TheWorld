@@ -9,5 +9,6 @@ namespace TheWorld.ViewModels
         [StringLength(100, MinimumLength = 5)]
         public string Name { get; set; }
         public DateTime DateCreated { get; set; } = DateTime.UtcNow;
+        public string Username { get; set; }
     }
 }

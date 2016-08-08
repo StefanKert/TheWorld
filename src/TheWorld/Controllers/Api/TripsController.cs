@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
@@ -11,6 +12,7 @@ using TheWorld.ViewModels;
 
 namespace TheWorld.Controllers.Api
 {
+    [Authorize]
     [Route("api/trips")]
     public class TripsController : Controller
     {
@@ -28,8 +30,9 @@ namespace TheWorld.Controllers.Api
         {
             try
             {
-                var results = _repository.GetAllTrips();
-                return Ok(Mapper.Map<IEnumerable<TripViewModel>>(results));
+                var trips = _repository.GetAllTripsWithStops(User.Identity.Name);
+                var results = Mapper.Map<IEnumerable<TripViewModel>>(trips);
+                return Ok(results);
             } catch(Exception ex)
             {
                 _logger.LogError($"Failed to get All Trips: {ex}");
@@ -43,6 +46,7 @@ namespace TheWorld.Controllers.Api
             if (ModelState.IsValid)
             {
                 var newTrip = Mapper.Map<Trip>(theTrip);
+                newTrip.UserName = User.Identity.Name;
                 _repository.AddTrip(newTrip);
 
                 if (await _repository.SaveChangesAsync())
